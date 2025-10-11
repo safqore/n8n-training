@@ -1,1 +1,1124 @@
-First Commit
+{
+  "name": "Email Classifier & Reply Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {
+          "readStatus": "unread"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -224,
+        752
+      ],
+      "id": "7cd6af73-a480-48ef-bc39-ae3092ab245e",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fpq6MYa9iHC3LCpD",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        296,
+        976
+      ],
+      "id": "6c2bc18a-7278-4f87-a71b-c017f7f27204",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "uNKbFNcyq1JqI9GO",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "FirstName, output.Name",
+        "joinMode": "keepNonMatches",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1024,
+        752
+      ],
+      "id": "c43100ea-76d6-49e0-b0f7-cddff8bef8a8",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1544,
+        1040
+      ],
+      "id": "79107b24-c8cb-4855-b35a-3449dd8ea0d1",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "uNKbFNcyq1JqI9GO",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "Label_6062063052804169733"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1824,
+        464
+      ],
+      "id": "2452761f-aa0e-4f03-9368-f4d7cce45be1",
+      "name": "Bug Notice",
+      "webhookId": "1a6a04bc-7e03-47b3-b298-876a87b973c5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fpq6MYa9iHC3LCpD",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "Label_8008484023279877826"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1824,
+        848
+      ],
+      "id": "9256dc9e-c466-4bd6-90d2-062d49a47db4",
+      "name": "Product Review",
+      "webhookId": "1a6a04bc-7e03-47b3-b298-876a87b973c5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fpq6MYa9iHC3LCpD",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "Label_6669727883467981604"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1824,
+        1040
+      ],
+      "id": "9e56c037-426d-41a8-9402-25991de218e3",
+      "name": "Misc.",
+      "webhookId": "1a6a04bc-7e03-47b3-b298-876a87b973c5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fpq6MYa9iHC3LCpD",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $json.id }}",
+        "labelIds": [
+          "Label_3152341634713821828"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1824,
+        656
+      ],
+      "id": "faf32465-24ed-4de3-b815-25d93f929f42",
+      "name": "Feature Request",
+      "webhookId": "1a6a04bc-7e03-47b3-b298-876a87b973c5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fpq6MYa9iHC3LCpD",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.snippet }}",
+        "options": {
+          "systemMessage": "=You are a helpful assistant working on the behalf of a development team that has launched their application.\n\nYou will respond in a polite and professional manner, according to the email. \n\nThese are just examples, make sure to change the wording but keep the context same.\n\nIf it is a bug notice, tell them that it has been noted and we will work on it, thanks for bringing this to our notice.\nIf it is a feature request, tell them thanks for the great idea and we will work on it.\nIf it is a product review, check if it is good or bad. If good, thank them for their great words and if it is bad, thank them for the constructive criticism.\nIf it is misc. respond accordingly but only in the constraints of a representative of a development team.\n\nYour email should always start with {{ $('Divide Text Into Labels').item.json.Introduction }}\n\nYour email signature should always be\n\nBest Regards,\nSafqore Dev Team \n\nOnce the email is composed, you will use the connected node to send a reply to the email address through the threadid\n\nONLY SEND ONE EMAIL PER WORKFLOW"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2720,
+        752
+      ],
+      "id": "fab63e01-ec3a-41ab-9837-6bb9587d8955",
+      "name": "AI Agent",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2728,
+        976
+      ],
+      "id": "3a32b0fa-7137-4d03-bcef-c2a326352458",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "uNKbFNcyq1JqI9GO",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.threadId }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        2856,
+        976
+      ],
+      "id": "0e97920a-0137-4e88-a7c4-f4ec2a297e83",
+      "name": "Reply to a message in Gmail",
+      "webhookId": "3fa98378-d0a0-4583-9746-9d7b688b15ce",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fpq6MYa9iHC3LCpD",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.From }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Name",
+              "description": "Name of person",
+              "required": true
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract the name from the email address.\n\nUse your abilities to identify if the associated name is a real human name or not. If it is a real human name, pass it on. If not, pass on an empty string."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        752
+      ],
+      "id": "2a81ecd1-33d3-4219-b016-e5259c58cf92",
+      "name": "Find Name"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5eca86a6-9974-4825-8572-0ff0a409befe",
+              "leftValue": "={{ $json.output.Name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        752
+      ],
+      "id": "69b5bc6b-ada4-4af6-9ad6-ed1f6cf268aa",
+      "name": "Name Found?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2b9ae58b-ade4-41b5-ba24-fd74efacec02",
+              "name": "Introduction",
+              "value": "=Hey {{ $('Find Name').item.json.output.Name.split(\" \")[0] }},",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        656
+      ],
+      "id": "f358b279-25a7-46b5-844f-70dd50aa8fc1",
+      "name": "Greet By Name"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "04e24d11-7367-430a-af9e-80bc1523d8e5",
+              "name": "Introduction",
+              "value": "=Hi there, {{ $json.output.Name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        848
+      ],
+      "id": "b9e59e26-6a36-472c-ba50-05d471436065",
+      "name": "General Greeting"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c385ad55-f42b-47f7-bfa7-f34923805e62",
+              "name": "Introduction",
+              "value": "={{ $json.Introduction }}",
+              "type": "string"
+            },
+            {
+              "id": "a1d1b4fa-f446-49e6-ba57-76eeaf232bf4",
+              "name": "id",
+              "value": "={{ $('Gmail Trigger').item.json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "c0da7b9f-42c4-4e27-bd03-8aa9311593e5",
+              "name": "threadId",
+              "value": "={{ $('Gmail Trigger').item.json.threadId }}",
+              "type": "string"
+            },
+            {
+              "id": "833d105f-9900-42ee-8916-ce51ff6e262e",
+              "name": "snippet",
+              "value": "={{ $('Gmail Trigger').item.json.snippet }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1248,
+        752
+      ],
+      "id": "ff816954-3c00-495b-9047-659aa6b29158",
+      "name": "Combine Info"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.snippet }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Bug Notice",
+              "description": "The email reports an error, malfunction, or problem in the app (e.g., crash, glitch, not working, error message, etc.)."
+            },
+            {
+              "category": "Feature Request",
+              "description": "The email suggests or asks for a new feature, change, or improvement in the app."
+            },
+            {
+              "category": "Product Review",
+              "description": "The email shares an opinion or feedback about the app’s quality, design, or performance, whether positive or negative."
+            },
+            {
+              "category": "Miscellaneous",
+              "description": "The email does not fit any of the above (for example: spam, greetings, general inquiry, job request, wrong contact, unrelated content, or empty messages)."
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "=Please classify the text provided by the user into one of the following categories: {categories}, and use the provided formatting instructions below. Don't explain, and only output the json.\n\nIf you are not 100% sure whether the email matches the first 3 categories, ALWAYS choose the Miscellaneous category.\n\nYou have to ALWAYS return one category.\n\nPass the  {{ $json.Introduction }} as it is everytime."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        1472,
+        752
+      ],
+      "id": "8a8067e0-d4a9-4255-b90d-ebf5ec692363",
+      "name": "Divide Text Into Labels"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b48b41a0-5528-45f0-b8ac-314a413c1049",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "02f97021-a61f-4bca-9533-0f542eed5f20",
+              "name": "threadId",
+              "value": "={{ $json.threadId }}",
+              "type": "string"
+            },
+            {
+              "id": "000c9cb6-72d1-4f50-82dc-e642eb50c43a",
+              "name": "Introduction",
+              "value": "={{ $('Divide Text Into Labels').item.json.Introduction }}",
+              "type": "string"
+            },
+            {
+              "id": "cfefcbdc-e5f0-415c-b683-abe32ae4ef4e",
+              "name": "snippet",
+              "value": "={{ $('Divide Text Into Labels').item.json.snippet }}",
+              "type": "string"
+            },
+            {
+              "id": "2bfd1b84-8dfd-45f4-93de-2309036b75ba",
+              "name": "Category",
+              "value": "Bug Notice",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2048,
+        464
+      ],
+      "id": "55bf4b5a-5ff2-4db9-8a88-9ac87664415f",
+      "name": "Bug Notice Info"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b48b41a0-5528-45f0-b8ac-314a413c1049",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "02f97021-a61f-4bca-9533-0f542eed5f20",
+              "name": "threadId",
+              "value": "={{ $json.threadId }}",
+              "type": "string"
+            },
+            {
+              "id": "000c9cb6-72d1-4f50-82dc-e642eb50c43a",
+              "name": "Introduction",
+              "value": "={{ $('Divide Text Into Labels').item.json.Introduction }}",
+              "type": "string"
+            },
+            {
+              "id": "cfefcbdc-e5f0-415c-b683-abe32ae4ef4e",
+              "name": "snippet",
+              "value": "={{ $('Divide Text Into Labels').item.json.snippet }}",
+              "type": "string"
+            },
+            {
+              "id": "2bfd1b84-8dfd-45f4-93de-2309036b75ba",
+              "name": "Category",
+              "value": "Feature Request",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2048,
+        656
+      ],
+      "id": "25c2c6a7-db5b-4b7b-9347-b1b142885a25",
+      "name": "Feature Request Info"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b48b41a0-5528-45f0-b8ac-314a413c1049",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "02f97021-a61f-4bca-9533-0f542eed5f20",
+              "name": "threadId",
+              "value": "={{ $json.threadId }}",
+              "type": "string"
+            },
+            {
+              "id": "000c9cb6-72d1-4f50-82dc-e642eb50c43a",
+              "name": "Introduction",
+              "value": "={{ $('Divide Text Into Labels').item.json.Introduction }}",
+              "type": "string"
+            },
+            {
+              "id": "cfefcbdc-e5f0-415c-b683-abe32ae4ef4e",
+              "name": "snippet",
+              "value": "={{ $('Divide Text Into Labels').item.json.snippet }}",
+              "type": "string"
+            },
+            {
+              "id": "2bfd1b84-8dfd-45f4-93de-2309036b75ba",
+              "name": "Category",
+              "value": "Product Review",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2048,
+        848
+      ],
+      "id": "f1745a57-2ba7-4953-bc7e-3e13b0302ace",
+      "name": "Product Review Info"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b48b41a0-5528-45f0-b8ac-314a413c1049",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "02f97021-a61f-4bca-9533-0f542eed5f20",
+              "name": "threadId",
+              "value": "={{ $json.threadId }}",
+              "type": "string"
+            },
+            {
+              "id": "000c9cb6-72d1-4f50-82dc-e642eb50c43a",
+              "name": "Introduction",
+              "value": "={{ $('Divide Text Into Labels').item.json.Introduction }}",
+              "type": "string"
+            },
+            {
+              "id": "cfefcbdc-e5f0-415c-b683-abe32ae4ef4e",
+              "name": "snippet",
+              "value": "={{ $('Divide Text Into Labels').item.json.snippet }}",
+              "type": "string"
+            },
+            {
+              "id": "2bfd1b84-8dfd-45f4-93de-2309036b75ba",
+              "name": "Category",
+              "value": "Misc.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2048,
+        1040
+      ],
+      "id": "fce4a8ea-eb35-46cd-9e77-70b6ea63e8f2",
+      "name": "Misc. Info"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Category }}",
+                    "rightValue": "Bug Notice",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "abd6c2ff-aa4a-434c-a598-5f0f10bc546f"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "88fa01a5-9109-4245-8282-041456529e72",
+                    "leftValue": "={{ $json.Category }}",
+                    "rightValue": "Feature Request",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6fa50350-7714-4d27-88ab-407064726d54",
+                    "leftValue": "={{ $json.Category }}",
+                    "rightValue": "Product Review",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d0315e47-71a6-4a74-9171-2c03a1f45767",
+                    "leftValue": "={{ $json.Category }}",
+                    "rightValue": "Misc.",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        2272,
+        720
+      ],
+      "id": "c8275fbb-d65a-4428-9de3-3be78d5fdd77",
+      "name": "Check Which Label"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "48ccce27-4240-4478-9f2d-700155a5c6e7",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            },
+            {
+              "id": "c7da22d0-9943-4b17-9f88-b4e90c08c1f4",
+              "name": "snippet",
+              "value": "={{ $json.snippet }}",
+              "type": "string"
+            },
+            {
+              "id": "5a62da4c-709b-4b1e-8efa-75505265d68f",
+              "name": "Introduction",
+              "value": "={{ $json.Introduction }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2496,
+        752
+      ],
+      "id": "ccc340c5-8aa8-4999-b988-ebcfce701002",
+      "name": "Pass Final Info"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b8da5a87-7eaf-4967-a07a-9ebd639e33cb",
+              "leftValue": "={{ $json.From }}",
+              "rightValue": "safqoretest@gmail.com",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        752
+      ],
+      "id": "9d02e4b2-85ea-4a49-8dc7-049a0bb72f8f",
+      "name": "Close Loop"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Close Loop",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Find Name",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Combine Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Divide Text Into Labels",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bug Notice": {
+      "main": [
+        [
+          {
+            "node": "Bug Notice Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Product Review": {
+      "main": [
+        [
+          {
+            "node": "Product Review Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Misc.": {
+      "main": [
+        [
+          {
+            "node": "Misc. Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Feature Request": {
+      "main": [
+        [
+          {
+            "node": "Feature Request Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Name": {
+      "main": [
+        [
+          {
+            "node": "Name Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Name Found?": {
+      "main": [
+        [
+          {
+            "node": "Greet By Name",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "General Greeting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Greet By Name": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "General Greeting": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combine Info": {
+      "main": [
+        [
+          {
+            "node": "Divide Text Into Labels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Divide Text Into Labels": {
+      "main": [
+        [
+          {
+            "node": "Bug Notice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Feature Request",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Product Review",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Misc.",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bug Notice Info": {
+      "main": [
+        [
+          {
+            "node": "Check Which Label",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Feature Request Info": {
+      "main": [
+        [
+          {
+            "node": "Check Which Label",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Product Review Info": {
+      "main": [
+        [
+          {
+            "node": "Check Which Label",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Misc. Info": {
+      "main": [
+        [
+          {
+            "node": "Check Which Label",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Which Label": {
+      "main": [
+        [
+          {
+            "node": "Pass Final Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pass Final Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pass Final Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Pass Final Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pass Final Info": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Close Loop": {
+      "main": [
+        [
+          {
+            "node": "Find Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "04e8397b-36b5-42f1-9491-f94de4a31559",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f2b60516d590765e4e1c690949afcb50529099f27176cf6d7f5919368a8b94e5"
+  },
+  "id": "Xodip5hqGAjc6LE6",
+  "tags": []
+}
