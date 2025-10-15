@@ -1,1 +1,166 @@
-
+{
+  "name": "Reddit Token Refresher",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "639296af-0ac6-437f-880b-0ba42dd2126f",
+      "name": "Refresh Token Every Night at 12 AM"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.reddit.com/api/v1/access_token",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "script:n8n_scraper:1.0 (by /u/No-Lie-8179)"
+            },
+            {
+              "name": "Authorization",
+              "value": "Basic b1BFZGdWbERKTldYdFlMVjRDTExZQTpfSERjV1dGeVdlaFBXZWV0dlRjM1JMeHJzWU9wQmc="
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "password"
+            },
+            {
+              "name": "username",
+              "value": "No-Lie-8179"
+            },
+            {
+              "name": "password",
+              "value": "ArhamReddit123"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "e7de3093-2d5a-4523-b614-ab068dfa0452",
+      "name": "Get Token From Reddit App"
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "dataTableId": {
+          "__rl": true,
+          "value": "V73qapjBkB56hqHY",
+          "mode": "list",
+          "cachedResultName": "RedditToken",
+          "cachedResultUrl": "/projects/h7raDi5v9Fi16gF7/datatables/V73qapjBkB56hqHY"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Key",
+              "keyValue": "Token"
+            }
+          ]
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Key": "Token",
+            "Value": "={{ $json.access_token }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Key",
+              "displayName": "Key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Value",
+              "displayName": "Value",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "99243506-801c-49bc-b0a9-2ec46439f5b7",
+      "name": "Add Token To Table"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Refresh Token Every Night at 12 AM": {
+      "main": [
+        [
+          {
+            "node": "Get Token From Reddit App",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Token From Reddit App": {
+      "main": [
+        [
+          {
+            "node": "Add Token To Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bcd38b30-d6d1-447d-a84a-0e3fe0056126",
+  "meta": {
+    "instanceId": "f2b60516d590765e4e1c690949afcb50529099f27176cf6d7f5919368a8b94e5"
+  },
+  "id": "e9iMJbFFREflNDhX",
+  "tags": []
+}

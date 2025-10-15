@@ -1,0 +1,758 @@
+{
+  "name": "Reddit Leads Scraping & Qualification Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        32
+      ],
+      "id": "f77602ce-3ece-44a6-8b6b-5971450b8041",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "V73qapjBkB56hqHY",
+          "mode": "list",
+          "cachedResultName": "RedditToken",
+          "cachedResultUrl": "/projects/h7raDi5v9Fi16gF7/datatables/V73qapjBkB56hqHY"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "Key",
+              "keyValue": "Token"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1,
+      "position": [
+        224,
+        32
+      ],
+      "id": "c422cf10-cc6a-46c1-9375-e4996724408f",
+      "name": "Get Token From Table"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "061eebb3-170a-4f85-805c-30bff0e043f3",
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.Value }}",
+              "type": "string"
+            },
+            {
+              "id": "87729117-7fec-4a35-b37d-9a38179b6bb8",
+              "name": "User-Agent",
+              "value": "script:n8n_scraper:1.0 (by /u/No-Lie-8179)",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        32
+      ],
+      "id": "8f1931a4-45c8-4667-90db-7a25b5835a2c",
+      "name": "Format Token In Headers"
+    },
+    {
+      "parameters": {
+        "url": "https://oauth.reddit.com/r/VideoEditors_forhire/new.json",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "=Authorization",
+              "value": "={{ $json.Authroization }}"
+            },
+            {
+              "name": "User-Agent",
+              "value": "={{ $json['User-Agent'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        672,
+        32
+      ],
+      "id": "ca90ae8e-fb68-48cd-a1d5-b42655939dfb",
+      "name": "Scrape Reddit Posts"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data.children",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        896,
+        32
+      ],
+      "id": "ef14cd2b-83c9-4987-9d72-8a0157b5f814",
+      "name": "Split Posts Into Batches"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7f638990-3a12-4115-b974-6d9469c0dc6d",
+              "leftValue": "={{ $json.data.link_flair_text }}",
+              "rightValue": "Hiring",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "1899ecd9-f0de-4f6c-bc5d-ff74033c5f27",
+              "leftValue": "={{ $json.data.link_flair_text }}",
+              "rightValue": "[Hiring]",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        32
+      ],
+      "id": "c019d03c-cb39-479e-b84a-a630c76bc1e2",
+      "name": "Keep Only Hiring Posts"
+    },
+    {
+      "parameters": {
+        "resource": "user",
+        "username": "={{ $json.data.author }}"
+      },
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        32
+      ],
+      "id": "d542741f-5d9c-4850-8ed4-d65c14ec179a",
+      "name": "Get Information Of Poster"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f067c603-9601-4359-9d86-64476389760f",
+              "name": "CreatedDate",
+              "value": "={{ $json.created_utc }}",
+              "type": "string"
+            },
+            {
+              "id": "1ea3bce0-785c-442f-9623-b8a03116aea1",
+              "name": "PostKarma",
+              "value": "={{ $('Get Information Of Poster').item.json.link_karma }}",
+              "type": "number"
+            },
+            {
+              "id": "209acba3-8b2e-4a2e-aa16-31730052fa29",
+              "name": "CommentKarma",
+              "value": "={{ $('Get Information Of Poster').item.json.comment_karma }}",
+              "type": "number"
+            },
+            {
+              "id": "f8a220a1-0945-42de-b52c-d552951d9752",
+              "name": "TotalKarma",
+              "value": "={{ $('Get Information Of Poster').item.json.total_karma }}",
+              "type": "number"
+            },
+            {
+              "id": "2b6e8644-b088-4c86-8367-2abc7d014e7d",
+              "name": "PostTitle",
+              "value": "={{ $('Keep Only Hiring Posts').item.json.data.title }}",
+              "type": "string"
+            },
+            {
+              "id": "8bc800c2-dd11-40cf-8a17-ceccf56d4949",
+              "name": "PostText",
+              "value": "={{ $('Keep Only Hiring Posts').item.json.data.selftext }}",
+              "type": "string"
+            },
+            {
+              "id": "b7c12256-cddf-4d79-a4fe-c43c793a6931",
+              "name": "PostLink",
+              "value": "={{ $('Keep Only Hiring Posts').item.json.data.url }}",
+              "type": "string"
+            },
+            {
+              "id": "073e797b-3bb4-4d67-8ecb-0bc1cbd588fd",
+              "name": "data.subreddit",
+              "value": "={{ $('Keep Only Hiring Posts').item.json.data.subreddit }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1568,
+        32
+      ],
+      "id": "265f6666-7a3e-4d31-9f60-c043f08ad9da",
+      "name": "Format Information"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2bd208ce-a15e-4bb6-a262-e57e8c0c54fe",
+              "leftValue": "={{ $json.CreatedDate }}",
+              "rightValue": "={{ (Date.now() / 1000) - (5 * 30 * 24 * 60 * 60) }}\n",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            },
+            {
+              "id": "3e63977f-947a-47b5-87fc-3aad487fe62e",
+              "leftValue": "={{ $json.TotalKarma }}",
+              "rightValue": 50,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1792,
+        32
+      ],
+      "id": "4ece61c1-0516-4af6-ad5c-52cef4716a6a",
+      "name": "Check Account Age & Karma",
+      "notesInFlow": true,
+      "notes": "To filter out most scam/bot accounts."
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $json.CreatedDate }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        2016,
+        32
+      ],
+      "id": "dccff1f5-5ca9-4c7b-bdf3-9c4334b9c2f1",
+      "name": "Format Date In Human Readable Form"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Post URL: {{ $('Format Information').item.json.PostLink }}\nPost Title: {{ $('Format Information').item.json.PostTitle }}\nPost Text: {{ $('Format Information').item.json.PostText }}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a lead qualification assistant for a freelancer who looks for potential clients on Reddit.\nYour job is to analyze Reddit posts (title + text) and decide whether the post is:\n\n- A potential client looking to hire someone (good lead)\n- A freelancer offering their own services (ignore)\n- Irrelevant or unclear (low priority)\n\nThen, if it is a potential lead, you must assign a priority score (1–10) based on how valuable or relevant the post seems.\n\nWhat you know about the user:\n\n- The user provides creative or digital services (like graphics, videos, or other client-based work).\n- The user searches Reddit subreddits like r/HungryArtists, r/forhire, r/VideoEditors_forhire and r/freelance for people looking to hire artists, designers, editors or marketers.\n\nPost Criteria:\n\n- Posts where people say things like “looking for”, “need someone”, “commission”, “hire”, or “paid work” are high priority.\n- Posts where people say “I can make”, “offering services”, or “my portfolio” are low priority or irrelevant.\n- Some people misuse flairs (e.g., mark as [Hiring] but are actually offering services), so you must rely on language and intent, not just the flair.\n- Posts that mention traditional or hand-drawn work are not useful, the user can only provide digital work.\n\nInput:\n\n- Use the input given by the user prompt.\n\nOutput:\n\n- Rules for scoring:\n    . 9–10: Very relevant (clear “hiring”, budget mentioned, matches your niche)\n    . 6–8: Somewhat relevant (hiring but vague or low budget)\n    . 3–5: Unclear intent\n    . 1–2: Irrelevant or offering their own services\n- Your reasoning should be based on:\n    . Words that indicate hiring intent (“need someone”, “looking to hire”, “commission”, “paid work”)\n    . Context clues like “budget”, “payment”, “PM me if interested”\n    . Avoid false positives (e.g., “I’m offering cheap logos” = offering, not hiring)\n    . Posts that mention schoolwork, AI prompts, or unpaid collabs are low priority"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2464,
+        -96
+      ],
+      "id": "e95f400a-fe8d-4644-a5f1-45259a6a3a9c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2480,
+        128
+      ],
+      "id": "ad8faac9-1054-443d-af8f-11a94c7b4a25",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "uNKbFNcyq1JqI9GO",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2240,
+        32
+      ],
+      "id": "e5935fdc-e3ff-422a-bc7a-80697eb64b57",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"isHiring\": true,\n  \"priorityScore\": 9,\n  \"reason\": \"The user is looking for someone to design a logo and mentioned a paid budget.\",\n  \"category\": \"Graphic Design\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2608,
+        128
+      ],
+      "id": "96f92d53-dfad-452b-b294-a3a1c753f27e",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Jt7WU5V3mvPofdWZFXUMqdTPZ5Eo1RVoqWLwJ3j76yM",
+          "mode": "list",
+          "cachedResultName": "Reddit Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Jt7WU5V3mvPofdWZFXUMqdTPZ5Eo1RVoqWLwJ3j76yM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "=gid=0",
+          "mode": "id"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "PRIORITY SCORE": "={{ $('AI Agent').item.json.output.priorityScore }}",
+            "CATEGORY": "={{ $('AI Agent').item.json.output.category }}",
+            "POST TITLE": "={{ $('Format Information').item.json.PostTitle }}",
+            "POST TEXT": "={{ $('Format Information').item.json.PostText }}",
+            "POST URL": "={{ $('Format Information').item.json.PostLink }}",
+            "SUB-REDDIT": "={{ $('Format Information').item.json.data.subreddit }}",
+            "REASON": "={{ $('AI Agent').item.json.output.reason }}",
+            "AUTHOR ID": "={{ $('Keep Only Hiring Posts').item.json.data.author }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "POST URL",
+              "displayName": "POST URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AUTHOR ID",
+              "displayName": "AUTHOR ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "PRIORITY SCORE",
+              "displayName": "PRIORITY SCORE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "REASON",
+              "displayName": "REASON",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "POST TITLE",
+              "displayName": "POST TITLE",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "POST TEXT",
+              "displayName": "POST TEXT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "SUB-REDDIT",
+              "displayName": "SUB-REDDIT",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "CATEGORY",
+              "displayName": "CATEGORY",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3264,
+        32
+      ],
+      "id": "c0ff5bd2-0691-4520-9f72-c98c208eb940",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "C6VSzvnZQfpXnxD0",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d16b4dea-d1a3-4c4f-9304-a881ce55e51c",
+              "leftValue": "={{ $('Format Information').item.json.PostLink }}",
+              "rightValue": "={{ $json['POST URL'] }}",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3040,
+        -96
+      ],
+      "id": "09586aec-8bbc-4cfc-b729-0fb2e298aec5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1Jt7WU5V3mvPofdWZFXUMqdTPZ5Eo1RVoqWLwJ3j76yM",
+          "mode": "list",
+          "cachedResultName": "Reddit Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Jt7WU5V3mvPofdWZFXUMqdTPZ5Eo1RVoqWLwJ3j76yM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2816,
+        -96
+      ],
+      "id": "80887a81-6b06-46d9-98c9-21470b320690",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "C6VSzvnZQfpXnxD0",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Token From Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Token From Table": {
+      "main": [
+        [
+          {
+            "node": "Format Token In Headers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Token In Headers": {
+      "main": [
+        [
+          {
+            "node": "Scrape Reddit Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Scrape Reddit Posts": {
+      "main": [
+        [
+          {
+            "node": "Split Posts Into Batches",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Posts Into Batches": {
+      "main": [
+        [
+          {
+            "node": "Keep Only Hiring Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keep Only Hiring Posts": {
+      "main": [
+        [
+          {
+            "node": "Get Information Of Poster",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Information Of Poster": {
+      "main": [
+        [
+          {
+            "node": "Format Information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Information": {
+      "main": [
+        [
+          {
+            "node": "Check Account Age & Karma",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Account Age & Karma": {
+      "main": [
+        [
+          {
+            "node": "Format Date In Human Readable Form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Date In Human Readable Form": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8097fcf2-50f8-4111-964e-30ff60130b49",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f2b60516d590765e4e1c690949afcb50529099f27176cf6d7f5919368a8b94e5"
+  },
+  "id": "YictbQVKeGQ5dR2f",
+  "tags": []
+}
