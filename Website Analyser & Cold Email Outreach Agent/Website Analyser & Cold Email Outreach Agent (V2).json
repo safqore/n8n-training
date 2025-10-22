@@ -1,0 +1,1400 @@
+{
+  "name": "Website Analyser & Cold Email Outreach Agent",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2816,
+        576
+      ],
+      "id": "f3369170-2147-484e-903d-69992abda3cb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.builtwith.com/free1/api.json?KEY=c4c59d89-e8a6-4c21-91c7-c356b4338272&LOOKUP=leadgenman.com",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        672,
+        96
+      ],
+      "id": "aee7ac67-8fef-4c28-9c87-dbb9c1c60c83",
+      "name": "Get Website Tech Stack"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $json; // output from HTTP Request\nconst cms = data.groups.find(g => g.name === 'cms');\nconst analytics = data.groups.find(g => g.name === 'analytics');\nconst framework = data.groups.find(g => g.name === 'framework');\nconst hosting = data.groups.find(g => g.name === 'hosting');\n\nreturn [{\n  domain: data.domain,\n  cms: cms?.categories.map(c => c.name).join(', ') || 'N/A',\n  analytics: analytics?.categories.map(c => c.name).join(', ') || 'N/A',\n  framework: framework?.categories.map(c => c.name).join(', ') || 'N/A',\n  hosting: hosting?.categories.map(c => c.name).join(', ') || 'N/A',\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        96
+      ],
+      "id": "0ab5da76-c560-4a28-ad64-9ac644165eac",
+      "name": "Parse Important Information"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1192,
+        320
+      ],
+      "id": "f92affa0-33e7-44e3-aed3-c5f1f6a5ca0d",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Iy8G96hV8c6vpgQr",
+          "name": "OpenAI Key (Safqore)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "FirstName, output.Name",
+        "joinMode": "keepNonMatches",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        448,
+        96
+      ],
+      "id": "1a5066f9-07c0-4a08-a82f-2544c765093b",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.Email }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Name",
+              "description": "Name of person",
+              "required": true
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract the name from the email address.\n\nUse your abilities to identify if the associated name is a real human name or not. If it is a real human name, pass it on. If not, pass on an empty string."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -352,
+        96
+      ],
+      "id": "e76029d1-6c78-4a7f-91f0-87e2090bc493",
+      "name": "Find Name"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5eca86a6-9974-4825-8572-0ff0a409befe",
+              "leftValue": "={{ $json.output.Name }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        96
+      ],
+      "id": "7e4ee347-43f1-4b03-904d-d60a910d3606",
+      "name": "Name Found?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2b9ae58b-ade4-41b5-ba24-fd74efacec02",
+              "name": "Introduction",
+              "value": "=Hey {{ $('Find Name').item.json.output.Name.split(\" \")[0] }},",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        0
+      ],
+      "id": "d91103e6-5781-4bdf-bbea-c8cf426c3871",
+      "name": "Greet By Name"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "04e24d11-7367-430a-af9e-80bc1523d8e5",
+              "name": "Introduction",
+              "value": "=Hi there, {{ $json.output.Name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        224,
+        192
+      ],
+      "id": "7afea0de-3b20-459d-a15c-e24bac0a231b",
+      "name": "General Greeting"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -280,
+        320
+      ],
+      "id": "8f73e8a5-bae9-42ee-ab5d-ac72adae3481",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "Iy8G96hV8c6vpgQr",
+          "name": "OpenAI Key (Safqore)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write Email",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a cold email specialist working for a digital agency.\n\nYou have the following information about a company:\n\n- Company Website Domain: {{ $('Parse Important Information').item.json.domain }}\n- Company Industry: {{ $json.Industry }}\n- Company Website CMS: {{ $('Parse Important Information').item.json.cms }}\n- Company Website Analytics: {{ $('Parse Important Information').item.json.analytics }}\n- Company Website Framework: {{ $('Parse Important Information').item.json.framework }}\n- Company Website Hosting: {{ $('Parse Important Information').item.json.hosting }}\n\nYour Task:\n\n- Using the information above, write a short, personalized, and effective cold email to the company.\n- Start with a brief and natural introduction mentioning what you noticed about their website (use the CMS, framework, hosting, or analytics info if relevant).\n- Compare their website to top-performing sites in the same industry, pointing out a few realistic opportunities for improvement.\n- Offer quick, helpful insights on how our agency can help them improve these areas.\n- End with a separate short paragraph inviting them to a quick, friendly chat (10–15 minutes) to discuss ideas. The CTA should sound natural, not pushy.\n\nGuidelines:\n\n- Write in a 2-paragraph + 1 closing CTA structure (three short paragraphs total).\n- Keep the tone human, professional, friendly, and consultative — like a real person, not a script.\n- Use short, clear sentences and natural transitions.\n- Avoid overloading with technical details; focus on value and curiosity.\n- Keep the total length under 90 words — concise, easy to skim, and conversational.\n- Avoid em dashes, corporate buzzwords, or robotic phrasing.\n- Always include this email signature:\nBest Regards,\nSafqore\n\nOnce the email is generated, send it using the connected Gmail tool."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1752,
+        96
+      ],
+      "id": "f18fc932-0c22-45b6-bc0f-90d25a6d8c5d",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-nano",
+          "mode": "list",
+          "cachedResultName": "gpt-5-nano"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1696,
+        320
+      ],
+      "id": "ea97643e-338a-4ef9-8d2f-d4fd758bf80e",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "Iy8G96hV8c6vpgQr",
+          "name": "OpenAI Key (Safqore)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.hunter.io/v2/domain-search?domain={{ $json.Domain }}&api_key=9fb5ab9fb73d3d94ef964294279468cc451142d0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1920,
+        288
+      ],
+      "id": "b2ed4ca8-66db-4099-9fac-485802e5d415",
+      "name": "Get Email From Website"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "818aa508-5919-40e0-9d74-b432c3076123",
+              "leftValue": "={{ $json.Type }}",
+              "rightValue": "personal",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "599ccadf-930d-496d-84d2-0e97aa2c8974",
+              "leftValue": "={{ $json.Validity }}",
+              "rightValue": "valid",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "dcd34ee4-d73a-4e82-b7d6-d710cf9c33ac",
+              "leftValue": "={{ $json.Acceptance }}",
+              "rightValue": "false",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1024,
+        192
+      ],
+      "id": "3d6a2add-6ed3-4743-94c5-272155cbf727",
+      "name": "Check Email Type and Verify"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI",
+          "mode": "list",
+          "cachedResultName": "Websites",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2592,
+        576
+      ],
+      "id": "959d3237-4061-4561-bde5-883c60206cd2",
+      "name": "Get Websites From Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MCHYAvglqSWVCD28",
+          "name": "Safqore Test Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4c81d205-2fce-4685-baf3-066a68ffa419",
+              "leftValue": "={{ $json.data.emails }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1696,
+        288
+      ],
+      "id": "b7741cc9-a410-437b-beb7-826e7a8648ea",
+      "name": "Email Found?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI",
+          "mode": "list",
+          "cachedResultName": "Websites",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $json.data.emails[0].value }}",
+            "row_number": "={{ $('Get Websites From Sheet').item.json.row_number }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Domain",
+              "displayName": "Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1472,
+        192
+      ],
+      "id": "2d1f9309-a950-4bd9-b911-1a3bb5324689",
+      "name": "Add Email To Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MCHYAvglqSWVCD28",
+          "name": "Safqore Test Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI",
+          "mode": "list",
+          "cachedResultName": "Websites",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "=Not Found",
+            "row_number": "={{ $('Get Websites From Sheet').item.json.row_number }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Domain",
+              "displayName": "Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1472,
+        384
+      ],
+      "id": "f261ec18-6a45-4611-806a-f66ee0ddf416",
+      "name": "Add Error To Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MCHYAvglqSWVCD28",
+          "name": "Safqore Test Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI",
+          "mode": "list",
+          "cachedResultName": "Websites",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Get Websites From Sheet').item.json.row_number }}",
+            "Status": "Valid"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Domain",
+              "displayName": "Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -800,
+        96
+      ],
+      "id": "aff185fd-478d-4c34-9e15-c9d71e364a78",
+      "name": "Add Verification To Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MCHYAvglqSWVCD28",
+          "name": "Safqore Test Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "afdcf921-f7ff-45b6-8e78-9d1ee50ca048",
+              "name": "Name",
+              "value": "={{ $json.Name }}",
+              "type": "string"
+            },
+            {
+              "id": "ef2b8683-ebe1-47b2-a00c-9704ad7f0f33",
+              "name": "Domain",
+              "value": "={{ $json.Domain }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2144,
+        288
+      ],
+      "id": "23a96faa-7fed-400d-bd4b-024d27a47b8d",
+      "name": "Format 1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f7e9444f-08d2-492c-b831-b31f7644c033",
+              "name": "Email",
+              "value": "={{ $('Get Email From Website').item.json.data.emails[0].value }}",
+              "type": "string"
+            },
+            {
+              "id": "192e9344-f342-4ee6-b8b4-0b073a65fe88",
+              "name": "First Name",
+              "value": "={{ $('Get Email From Website').item.json.data.emails[0].first_name }}",
+              "type": "string"
+            },
+            {
+              "id": "36865250-c997-4f52-bf73-b6b3e5c81476",
+              "name": "Validity",
+              "value": "={{ $('Get Email From Website').item.json.data.emails[0].verification.status }}",
+              "type": "string"
+            },
+            {
+              "id": "bdb6e90e-8c74-46f7-b6e6-940096c1d474",
+              "name": "Acceptance",
+              "value": "={{ $('Get Email From Website').item.json.data.accept_all }}",
+              "type": "string"
+            },
+            {
+              "id": "158c8ac6-f3bd-4b99-8cce-9a6eae8037ab",
+              "name": "Type",
+              "value": "={{ $('Get Email From Website').item.json.data.emails[0].type }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1248,
+        192
+      ],
+      "id": "d2bf7a9b-1af0-4e00-b041-4e9cb8c25653",
+      "name": "Format 2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fd98e4f6-8204-4ffe-a9d1-ad57ccd5d412",
+              "name": "Email",
+              "value": "={{ $('Check Email Type and Verify').item.json.Email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -576,
+        96
+      ],
+      "id": "a1f43758-d9e4-4ae7-969e-00572d37eb86",
+      "name": "Format 3"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI",
+          "mode": "list",
+          "cachedResultName": "Websites",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1gdMbQHECOERWdyEgeA-UBP-D8r_JnJymwB-ycqAUetI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Get Websites From Sheet').item.json.row_number }}",
+            "Status": "Not Valid"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Domain",
+              "displayName": "Domain",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -800,
+        288
+      ],
+      "id": "aec35dbc-59ff-4d2a-90a5-677840df842d",
+      "name": "Add Error To Sheet 2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MCHYAvglqSWVCD28",
+          "name": "Safqore Test Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"Subject\": \"Email Subject\",\n\t\"Body\": \"Email body\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1952,
+        320
+      ],
+      "id": "f8da9dd0-8a46-49ec-a309-060459779a88",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Domain: {{ $json.domain }}\nCMS: {{ $json.cms }}\nAnalytics: {{ $json.analytics }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Here’s the tech stack for a website. Based on the tools and categories, what industry or business type most likely uses this stack? (Examples: eCommerce, marketing tech, SaaS platform, news blog, health service, finance, etc.) Be concise — output only the likely industry."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        1120,
+        96
+      ],
+      "id": "b5a9cbec-8a18-43ea-9cbc-6867040d2162",
+      "name": "Find Website Industry"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "08d2c434-e26a-46b7-803f-92a12518b8d8",
+              "name": "Website",
+              "value": "={{ $('Parse Important Information').item.json.domain }}",
+              "type": "string"
+            },
+            {
+              "id": "3e504ee8-01d2-4edf-8960-4ad5013af95f",
+              "name": "Industry",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "4c4a3d82-904d-441f-b7eb-75b774d101fd",
+              "name": "CMS",
+              "value": "={{ $('Parse Important Information').item.json.cms }}",
+              "type": "string"
+            },
+            {
+              "id": "94a1350f-b67a-49da-bcd4-74a601ce1abb",
+              "name": "Analytics",
+              "value": "={{ $('Parse Important Information').item.json.analytics }}",
+              "type": "string"
+            },
+            {
+              "id": "20b9993c-6e3e-4a1d-847e-c4b2182b12e5",
+              "name": "Framework",
+              "value": "={{ $('Parse Important Information').item.json.framework }}",
+              "type": "string"
+            },
+            {
+              "id": "80bde47a-56a5-4324-a4de-d1c5edce1137",
+              "name": "Hosting",
+              "value": "={{ $('Parse Important Information').item.json.hosting }}",
+              "type": "string"
+            },
+            {
+              "id": "7596b9ba-2e37-4b31-9fa1-9ed8a16fe7a9",
+              "name": "Email",
+              "value": "={{ $('Format 3').item.json.Email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1472,
+        96
+      ],
+      "id": "d92f0949-19ef-4925-90df-31bd7e1675c8",
+      "name": "Format 5"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "sendTo": "={{ $json.Email }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1824,
+        320
+      ],
+      "id": "b345de46-7f22-451a-843a-3b5bc4453c8d",
+      "name": "Create a draft in Gmail",
+      "webhookId": "f46fb7f4-10d1-4929-b95f-5ee29e3d58a3",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "FonJWXx3JvauQyK5",
+          "name": "Safqore Test Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -2368,
+        576
+      ],
+      "id": "57dee5c8-ce79-4624-94ed-6e8c6c88b262",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2160,
+        360
+      ],
+      "id": "144934fa-eafd-45e3-8e1a-6e3efdd11c3e",
+      "name": "Wait",
+      "webhookId": "97fb1f3a-e076-4afd-89cd-9b073944e12b"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Websites From Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Website Tech Stack": {
+      "main": [
+        [
+          {
+            "node": "Parse Important Information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Important Information": {
+      "main": [
+        [
+          {
+            "node": "Find Website Industry",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Find Website Industry",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Name": {
+      "main": [
+        [
+          {
+            "node": "Name Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Name Found?": {
+      "main": [
+        [
+          {
+            "node": "Greet By Name",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "General Greeting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Greet By Name": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "General Greeting": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Find Name",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Email From Website": {
+      "main": [
+        [
+          {
+            "node": "Email Found?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Get Website Tech Stack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Email Type and Verify": {
+      "main": [
+        [
+          {
+            "node": "Add Verification To Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add Error To Sheet 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Websites From Sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Found?": {
+      "main": [
+        [
+          {
+            "node": "Add Email To Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Add Error To Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Email To Sheet": {
+      "main": [
+        [
+          {
+            "node": "Format 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Verification To Sheet": {
+      "main": [
+        [
+          {
+            "node": "Format 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format 1": {
+      "main": [
+        [
+          {
+            "node": "Get Email From Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format 2": {
+      "main": [
+        [
+          {
+            "node": "Check Email Type and Verify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format 3": {
+      "main": [
+        [
+          {
+            "node": "Find Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Website Industry": {
+      "main": [
+        [
+          {
+            "node": "Format 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format 5": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a draft in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Format 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Error To Sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Error To Sheet 2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "255f0c31-0c89-4a03-b47d-07e550d60fab",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5ad1b46975b5fc623d6ef7f5cdf2b1e5f5916007266c5c87cf1d57434c6c7cdf"
+  },
+  "id": "Qf2sE8UYy6Z3xK9a",
+  "tags": []
+}
