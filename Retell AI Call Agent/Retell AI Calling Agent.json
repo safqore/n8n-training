@@ -1,1 +1,122 @@
-
+{
+  "name": "Retell AI Calling Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "fromNumber": "+13156503877",
+        "toNumber": "=+{{ $json['Phone Number'] }}",
+        "overrideAgentId": "agent_53feb857afcc1e9ff5e51f12ce",
+        "dynamicVariables": {
+          "keyvalue": [
+            {
+              "key": "name",
+              "value": "={{ $json.Name }}"
+            },
+            {
+              "key": "firstName",
+              "value": "={{ $json.Name.split(\" \")[0] }}"
+            },
+            {
+              "key": "email",
+              "value": "={{ $json.Email }}"
+            }
+          ]
+        }
+      },
+      "type": "@retellai/n8n-nodes-retellai.retellAi",
+      "typeVersion": 1,
+      "position": [
+        240,
+        -32
+      ],
+      "id": "1a7f79b6-565f-4d47-a0b6-78eb56889a02",
+      "name": "Create a phone call",
+      "credentials": {
+        "retellAIApi": {
+          "id": "QfTLl7un0F78QF7w",
+          "name": "RetellAI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -32
+      ],
+      "id": "d6df79bb-2411-41d5-857e-ef342cd390c2",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "10nKMsDGPvwnXQObZ9Hfiy7xqeITQlldvRjjxBXlZBV8",
+          "mode": "list",
+          "cachedResultName": "Retell Call List",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10nKMsDGPvwnXQObZ9Hfiy7xqeITQlldvRjjxBXlZBV8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10nKMsDGPvwnXQObZ9Hfiy7xqeITQlldvRjjxBXlZBV8/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        16,
+        -32
+      ],
+      "id": "758ebf83-2e7c-46a2-b367-67828c0a69fc",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "MCHYAvglqSWVCD28",
+          "name": "Safqore Test Sheets"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Create a phone call",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0eac9dde-d711-44ae-a29b-13dcd5fa2221",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5ad1b46975b5fc623d6ef7f5cdf2b1e5f5916007266c5c87cf1d57434c6c7cdf"
+  },
+  "id": "wF6nMc3XAyzOu1QX",
+  "tags": []
+}

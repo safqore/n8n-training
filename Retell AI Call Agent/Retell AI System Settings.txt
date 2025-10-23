@@ -1,0 +1,14 @@
+LLM: GPT 5 nano
+Voice: Anthony
+Voice Speed: 1
+Voice Temperature: 0.70
+Voice Volume: 0.86
+Background Sound: Convention Hall
+Responsiveness: 1
+Interruption Sensitivity: 0.9
+Enable Backchanneling: Yes
+Backchannel Frequency: 0.8
+Backchannel Words: yeah, hmm, uh-huh, okay
+Enable Speech Normalization: Yes
+Pronunciation: Safqore - sɛfkɔːr
+Max Call Duration: 5 min
